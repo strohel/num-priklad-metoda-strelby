@@ -5,7 +5,7 @@ SRC=main.c poc_uloha.c hledani_korenu.c
 OBJ=main.o poc_uloha.o hledani_korenu.o
 
 # implicit switches for gcc
-CFLAGS=-O1 -pipe -DDEBUG -Wall
+CFLAGS=-O1 -pipe -Wall
 
 # switches for linker
 LDFLAGS=-lm
@@ -17,9 +17,6 @@ CC=gcc
 # build, install, uninstall, clean a distrib do not have a file on their own
 .PHONY: build
 .PHONY: clean
-.PHONY: distrib
-.PHONY: distrib-git
-.PHONY: tarball
 
 # default target
 build: ${program}
