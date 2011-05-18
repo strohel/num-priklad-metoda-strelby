@@ -5,7 +5,7 @@ SRC=main.c poc_uloha.c hledani_korenu.c
 OBJ=main.o poc_uloha.o hledani_korenu.o
 
 # implicit switches for gcc
-CFLAGS=-O1 -pipe -Wall
+CFLAGS=-O1 -pipe -Wall -Wextra -pedantic
 
 # switches for linker
 LDFLAGS=-lm

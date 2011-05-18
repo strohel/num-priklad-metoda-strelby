@@ -25,7 +25,7 @@ void vypis_pouziti(char **argv, const struct odr2 *odr)
  * Precte cislo ze stringu a kdytak nahlasi chybu a ukonci program
  */
 double precti_cislo(const struct odr2 *odr, char **argv, char *string, const char *nazev) {
-	char *endptr; // pro detekci spravneho precteni cisel
+	char *endptr; /* pro detekci spravneho precteni cisel */
 	double ret;
 
 	ret = strtod(string, &endptr);
@@ -41,7 +41,8 @@ double precti_cislo(const struct odr2 *odr, char **argv, char *string, const cha
  * Implementace funkce f_1 ze zadani ODR
  */
 double f_1_impl(double x, double y_1) {
-	return y_1; // y' = f_1(x, z) = z
+	(void) x; /* toto je zde pouze abychom umlceli varovani kompilatoru */
+	return y_1; /* y' = f_1(x, z) = z */
 }
 
 /**
@@ -65,7 +66,7 @@ double f_pro_newtona(double parametr, const void *data) {
 		fprintf(stderr, "Chyba pri eulerovi.\n");
 		exit(1);
 	} else {
-		// vratime vzdalenost reseni v pravem bode od pozadovane hodnoty:
+		/* vratime vzdalenost reseni v pravem bode od pozadovane hodnoty: */
 		return odr->y[odr->N - 1] - odr->beta;
 	}
 }
@@ -84,27 +85,29 @@ void vypis_reseni(const struct odr2 *odr) {
 
 int main(int argc, char **argv)
 {
-	double f_der_0; // derivace f v bode 0
-	double epsilon = 0.001; // s jakou presnosti chceme urcit derivaci v bode 0
+	double f_der_0; /* derivace f v bode 0 */
+	double epsilon = 0.001; /* s jakou presnosti chceme urcit derivaci v bode 0 */
 	struct odr2 odr;
 
-	// vyplnime pole struktury zadani ODR, ktera jsou ve vypsani pouziti
-	odr.jmeno = "y'' + y' * tan(x) - y * (cos(x))^2"; // strink popisujici rovnici, bez "= 0"
-	odr.levy_kraj = 0; // levy okraj intervalu, na kterem chceme resit rovnici
-	odr.pravy_kraj = M_PI_4; // pravy okraj intervalu, na kterem chceme resit rovnici
-	odr.h = 0.005; // delka kroku pri diskretizaci
-	odr.N = lround((odr.pravy_kraj-odr.levy_kraj)/odr.h) + 1; // nastavime spravny pocet kroku
+	/* vyplnime pole struktury zadani ODR, ktera jsou ve vypsani pouziti */
+	odr.jmeno = "y'' + y' * tan(x) - y * (cos(x))^2"; /* strink popisujici rovnici, bez "= 0" */
+	odr.levy_kraj = 0; /* levy okraj intervalu, na kterem chceme resit rovnici */
+	odr.pravy_kraj = 3.14159265358979323846 / 4.; /* pravy okraj intervalu */
+	odr.h = 0.005; /* delka kroku pri diskretizaci */
+	odr.N = lround((odr.pravy_kraj-odr.levy_kraj)/odr.h) + 1; /* nastavime spravny pocet kroku */
 
 	if(argc != 3) {
 		vypis_pouziti(argv, &odr);
 		exit(1);
 	}
 
-	// vyplnime zbytek strukturu popisujici zadani ODR:
-	odr.f_1 = f_1_impl; // y' = f_1(x, z)
-	odr.f_2 = f_2_impl; // y'' = z' = f_2(x, y, z)
-	odr.alfa = precti_cislo(&odr, argv, argv[1], "alfa"); // pozadovana hodnota hledane funkce na levem kraji
-	odr.beta = precti_cislo(&odr, argv, argv[2], "beta"); // pozadovana hodnota hledane funkce na pravem kraji
+	/* vyplnime zbytek strukturu popisujici zadani ODR: */
+	odr.f_1 = f_1_impl; /* y' = f_1(x, z) */
+	odr.f_2 = f_2_impl; /* y'' = z' = f_2(x, y, z) */
+	/* pozadovana hodnota hledane funkce na levem kraji: */
+	odr.alfa = precti_cislo(&odr, argv, argv[1], "alfa");
+	/* pozadovana hodnota hledane funkce na pravem kraji: */
+	odr.beta = precti_cislo(&odr, argv, argv[2], "beta");
 
 	odr.y = malloc(odr.N * sizeof(double));
 	if(odr.y == NULL) {
@@ -118,7 +121,7 @@ int main(int argc, char **argv)
 			odr.levy_kraj, odr.alfa, odr.pravy_kraj, odr.beta, odr.h);
 
 	f_der_0 = najdi_koren_pulenim(f_pro_newtona, (const void *) &odr,
-								  -100., 100., epsilon); // TODO: dynamicke okraje
+								  -100., 100., epsilon); /* TODO: dynamicke okraje */
 	fprintf(stderr, "Parametr nalezen: f'(%f) = %f  (+- %f)\n", odr.levy_kraj, f_der_0, epsilon);
 
 	vypis_reseni(&odr);
