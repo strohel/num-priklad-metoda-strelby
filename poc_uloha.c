@@ -1,39 +1,35 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "poc_uloha.h"
 
 
 /**
- * Funkce pro reseni pocatecni ulohy pro ODR 2. radu eulerovou metodou.
+ * Funkce pro reseni pocatecni ulohy pro ODR 2. radu eulerovou metodou. Pokud uspeje, zapise do
+ * pole s adresou odr->y reseni (pole doublu, kterych je odr->N). Pole odr->y uz musi byt
+ * naalokovano! Pokud neuspeje, neni obsah pole odr->y definovan.
  *
- * @param odr ukazatel na zadani diferencialni rovnice
- * @param x pocatecni x
- * @param y pocatecni y = y(poc_x)
- * @param y_1 pocatecni y' = y'(poc_x)
- * @param h delka kroku
- * @param N pocet kroku
+ * @param odr ukazatel na zadani diferencialni rovnice a parametru reseni
+ * @param y_1 pocatecni y' = y'(odr->levy_kraj)
  *
- * @return pole N prvku typu double nebo NULL pri chybe. Volajici musi posleze zavolat free(),
- *         jinak to je memory leak. Jako prvni prvek obsahuje pocatecni y!
+ * @return 0 pri uspechu - tedy kdyz je v odr->y reseni, jinak nenulovou hodnotu idikujici chybu.
  */
-double *euler2(const struct odr2 *odr, double x, double y, double y_1, double h, unsigned int N) {
-	double *res; // posloupnost ypsilonu
-	unsigned int i = 0;
+int euler2(const struct odr2 *odr, double y_1) {
+	unsigned int i;
+	double x = odr->levy_kraj; // nastavme prvni x na levy kraj
+	double y = odr->alfa; // hodnota fce v levem kraji
 
-	res = malloc(N * sizeof(double));
-	if(res == NULL) {
-		fprintf(stderr, "Nepovedlo se naalokovat %d bytu pro reseni rovnice.\n", N * sizeof(double));
-		return NULL;
+	if(odr->y == NULL) {
+		fprintf(stderr, "euler2(): odr->y uz musi byt naalokovano!\n");
+		return -1;
 	}
 
-	res[i] = y;
-	for(i = 1; i < N; i++) {
-		res[i] = y + h*odr->f_1(x, y_1);
-		y_1 = y_1 + h*odr->f_2(x, y, y_1);
+	odr->y[0] = y; // prvni bod reseni je znamy, vyplnme ho
+	for(i = 1; i < odr->N; i++) {
+		odr->y[i] = y + odr->h * odr->f_1(x, y_1);
+		y_1 += odr->h * odr->f_2(x, y, y_1);
 
-		y = res[i];
-		x += h;
+		y = odr->y[i];
+		x += odr->h;
 	}
-	return res;
+	return 0;
 }

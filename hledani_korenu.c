@@ -7,6 +7,7 @@
  * Najde koren funkce double f(double x) pulenim intervalu.
  *
  * @param f funkce, jejiz koren se ma najit
+ * @param data ukazatel na libovolna data, ktera se maji navic predat funkce fs
  * @param levy levy kraj intervalu, na kterem se ma hledat reseni
  * @param pravy pravy kraj intervalu, na kterem se hleda reseni
  * @param epsilon skutecny koren se bude od vraceneho lisit max o epsilon
@@ -16,9 +17,10 @@
  * @return koren funkce f z intervalu [levy, pravy] nebo NaN, pokud se
  * stala chyba.
  */
-double najdi_koren_pulenim(double (*f)(double x), double levy, double pravy, double epsilon) {
-	double f_levy = f(levy);
-	double f_pravy = f(pravy);
+double najdi_koren_pulenim(double (*f)(double, const void *), const void *data,
+						   double levy, double pravy, double epsilon) {
+	double f_levy = f(levy, data);
+	double f_pravy = f(pravy, data);
 	double prostredni = 1./0.; // schvalne NaN
 	double f_prostredni;
 
@@ -40,16 +42,16 @@ double najdi_koren_pulenim(double (*f)(double x), double levy, double pravy, dou
 
 	while((pravy - levy) >= epsilon) {
 		prostredni = (pravy + levy)/2.;
-		f_prostredni = f(prostredni);
+		f_prostredni = f(prostredni, data);
 		if(f_prostredni == 0) // pro extemni specialni pripady
 			return f_prostredni;
 
 		if(f_levy*f_prostredni < 0) {
 			pravy = prostredni; // pokud je koren v leve pulce intervalu
-			f_pravy = f(pravy);
+			f_pravy = f_prostredni;
 		} else if(f_pravy*f_prostredni < 0) {
 			levy = prostredni; // pokud je koren v prave casti intervalu
-			f_levy = f(levy);
+			f_levy = f_levy;
 		} else {
 			fprintf(stderr, "najdi_koren_pulenim(): ztratili jsme koren (jak?)!\n");
 			return 1./0.; // NaN
